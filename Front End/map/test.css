@@ -1,0 +1,94 @@
+body {
+    font-family: "helvetica";
+}
+
+.overview-map {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 544px;
+    bottom: 37px;
+}
+
+.mapSvg {
+    width: 100%;
+    height: 100%;
+}
+
+.mapGroup {
+    width: 100%;
+    height: 100%;
+    margin-left: 2%;
+    margin-top: 2%;
+}
+
+.mapPath {
+    stroke: white;
+    stroke-width: 1px;
+}
+
+.colorLegend {
+    position: relative;
+}
+
+.colorRect {
+    width: 36px;
+    height: 9px;
+    stroke-width: 2px;
+    stroke: #000;
+    border-radius: 2px;
+    y: 5px;
+}
+
+.colorText {
+    font-family: "Microsoft YaHei";
+    font-size: 20px;
+    font-weight: normal;
+    font-stretch: normal;
+    color: #000;
+}
+
+.Legend {
+    position: absolute;
+    top: 950px;
+    left: 15.8%;
+    width: auto;
+    height: 50px;
+}
+
+.tooltip {
+    position: absolute;
+    left: 40%;
+    top: 10%;
+    width: 229px;
+    height: 65px;
+    background-color: rgba(28, 95, 165, 0.9);
+    border-radius: 10px;
+    font-size: 20px;
+    font-weight: normal;
+    font-stretch: normal;
+    line-height: 31px;
+    letter-spacing: 0;
+    text-align: center;
+    font-family: "Microsoft YaHei";
+    /*border: 1px solid #666;*/
+}
+
+.SaleTip {
+    position: absolute;
+    display: inline-block;
+    left: 15.8%;
+    top: 870px;
+    width: 181px;
+    /*height: 70px;*/
+    background-color: rgba(28, 95, 165, 0.9);
+    border-radius: 10px;
+    opacity: 0.9;
+    font-size: 18px;
+    font-weight: normal;
+    font-stretch: normal;
+    line-height: 30px;
+    letter-spacing: 0;
+    text-align: center;
+    font-family: "Microsoft YaHei";
+}

@@ -1,0 +1,11 @@
+There are some common solutions for multi-label problem.
+
+1. using binary relevance
+
+2. using classifier chains
+
+3. using label powerset
+
+4. adapting algorithm
+
+5. Ensemble learning
