@@ -258,6 +258,7 @@ class CompareBT(object):
             return False
         return self.isMirror(root1.left, root2.right) and self.isMirror(root1.right, root2.left)
 
+# 翻转二叉树
 class MirrorBT(object):
     def getMirror(self, root):
         if not root:
@@ -317,6 +318,37 @@ class BST(object):
                 cur = cur.right
         return True
 
+# 路径和问题（深度优先遍历）
+class PathSum(object):
+    # 是否存在路径和等于某个值
+    def existPath(self, root, num):
+        def traverse(node, num):
+            if not node:
+                return False
+            num -= node.val
+            if num == 0 and node.left == None and node.right == None:
+                return True
+            res = traverse(node.left, num) or traverse(node.right, num)
+            return res
+        res = traverse(root, num)
+        return res
+
+    # 返回所有路径，使之和等于某个值
+    def getPath(self, root, num):
+        res = []
+        def traverse(node, num, path):
+            if not node:
+                return
+            num -= node.val
+            if num == 0 and node.left == None and node.right == None:
+                path.append(node.val)
+                res.append(path)
+                return
+            traverse(node.left, num, path + [node.val])
+            traverse(node.right, num, path + [node.val])
+        traverse(root, num, [])
+        return res
+
 if __name__ == '__main__':
     # 构建一棵二叉树
     A = TreeNode(1)
@@ -333,94 +365,101 @@ if __name__ == '__main__':
     C.left = F
     C.right = G
 
-    # 前序遍历
-    traverse = TraverseBT()
-    res = traverse.recursive_preOrder(A)
-    res2 = traverse.iterative_preOrder(A)
-    print(res, res2)
-    # 中序遍历
-    res3 = traverse.recursive_inOrder(A)
-    res4 = traverse.iterative_inOrder(A)
-    print(res3, res4)
-    # 后序遍历
-    res5 = traverse.recursive_postOrder(A)
-    res6 = traverse.iterative_postOrder(A)
-    print(res5, res6)
-    # 层次遍历
-    res7 = traverse.levelOrder(A)
-    print(res7)
+    # # 前序遍历
+    # traverse = TraverseBT()
+    # res = traverse.recursive_preOrder(A)
+    # res2 = traverse.iterative_preOrder(A)
+    # print(res, res2)
+    # # 中序遍历
+    # res3 = traverse.recursive_inOrder(A)
+    # res4 = traverse.iterative_inOrder(A)
+    # print(res3, res4)
+    # # 后序遍历
+    # res5 = traverse.recursive_postOrder(A)
+    # res6 = traverse.iterative_postOrder(A)
+    # print(res5, res6)
+    # # 层次遍历
+    # res7 = traverse.levelOrder(A)
+    # print(res7)
+    #
+    # # 统计节点个数
+    # count = CountBT()
+    # nodes_num = count.count_nodes_bfs(A)
+    # nodes_num2 = count.count_nodes_dfs(A)
+    # nodes_num3 = count.recursive_count(A)
+    # print(nodes_num, nodes_num2, nodes_num3)
+    #
+    # # 计算二叉树的高度
+    # high = HighBT()
+    # height = high.recursive_high(A)
+    # height2 = high.level_high(A)
+    # print(height, height2)
+    #
+    # # 计算二叉树每层的节点个数
+    # klevel = KLevelBT()
+    # klevelNum = klevel.kLevel_node(A, 3)
+    # klevelNum2 = klevel.recursive_klevel_node(A, 3)
+    # print(klevelNum, klevelNum2)
+    #
+    # # 计算二叉树叶子节点个数
+    # leafs = LeafBT()
+    # leaf_num = leafs.count_leaf(A)
+    # leaf_num2 = leafs.recursive_count_leaf(A)
+    # print(leaf_num, leaf_num2)
+    #
+    # # 判断两棵二叉树是否相同,一棵树是否是平衡二叉树
+    # A2 = TreeNode(1)
+    # B2 = TreeNode(2)
+    # C2 = TreeNode(3)
+    # D2 = TreeNode(4)
+    # E2 = TreeNode(5)
+    # F2 = TreeNode(6)
+    # G2 = TreeNode(7)
+    # A2.left = C2
+    # A2.right = B2
+    # B2.left = E2
+    # B2.right = D2
+    # C2.left = G2
+    # C2.right = F2
+    # comparation = CompareBT()
+    # isSame = comparation.isSame(A, A2)
+    # isAVL = comparation.isAVL(A)
+    # isMirror = comparation.isMirror(A, A2)
+    # print(isSame, isAVL, isMirror)
+    #
+    # # 求一棵树的镜像(自上而下递归翻转)
+    # Mirror = MirrorBT()
+    # root = Mirror.getMirror(A)
+    # root2 = Mirror.invertTree(A)
+    # print(root.left.val, root.left.left.val)
+    # print(root2.left.val, root2.left.left.val)
+    #
+    # # 求两个节点的最近公共祖先
+    # common = commonParentBT()
+    # parents = common.getCommonParent(A, E, G)
+    # print(parents.val)
+    #
+    # # 判断一棵树是否是二分搜索树
+    # A3 = TreeNode(4)
+    # B3 = TreeNode(2)
+    # C3 = TreeNode(6)
+    # D3 = TreeNode(1)
+    # E3 = TreeNode(3)
+    # F3 = TreeNode(5)
+    # G3 = TreeNode(7)
+    # A3.left = B3
+    # A3.right = C3
+    # B3.left = D3
+    # B3.right = E3
+    # C3.left = F3
+    # C3.right = G3
+    # bst = BST()
+    # isBST = bst.isBST(A3)
+    # print(isBST)
 
-    # 统计节点个数
-    count = CountBT()
-    nodes_num = count.count_nodes_bfs(A)
-    nodes_num2 = count.count_nodes_dfs(A)
-    nodes_num3 = count.recursive_count(A)
-    print(nodes_num, nodes_num2, nodes_num3)
-
-    # 计算二叉树的高度
-    high = HighBT()
-    height = high.recursive_high(A)
-    height2 = high.level_high(A)
-    print(height, height2)
-
-    # 计算二叉树每层的节点个数
-    klevel = KLevelBT()
-    klevelNum = klevel.kLevel_node(A, 3)
-    klevelNum2 = klevel.recursive_klevel_node(A, 3)
-    print(klevelNum, klevelNum2)
-
-    # 计算二叉树叶子节点个数
-    leafs = LeafBT()
-    leaf_num = leafs.count_leaf(A)
-    leaf_num2 = leafs.recursive_count_leaf(A)
-    print(leaf_num, leaf_num2)
-
-    # 判断两棵二叉树是否相同,一棵树是否是平衡二叉树
-    A2 = TreeNode(1)
-    B2 = TreeNode(2)
-    C2 = TreeNode(3)
-    D2 = TreeNode(4)
-    E2 = TreeNode(5)
-    F2 = TreeNode(6)
-    G2 = TreeNode(7)
-    A2.left = C2
-    A2.right = B2
-    B2.left = E2
-    B2.right = D2
-    C2.left = G2
-    C2.right = F2
-    comparation = CompareBT()
-    isSame = comparation.isSame(A, A2)
-    isAVL = comparation.isAVL(A)
-    isMirror = comparation.isMirror(A, A2)
-    print(isSame, isAVL, isMirror)
-
-    # 求一棵树的镜像(自上而下递归翻转)
-    Mirror = MirrorBT()
-    root = Mirror.getMirror(A)
-    root2 = Mirror.invertTree(A)
-    print(root.left.val, root.left.left.val)
-    print(root2.left.val, root2.left.left.val)
-
-    # 求两个节点的最近公共祖先
-    common = commonParentBT()
-    parents = common.getCommonParent(A, E, G)
-    print(parents.val)
-
-    # 判断一棵树是否是二分搜索树
-    A3 = TreeNode(4)
-    B3 = TreeNode(2)
-    C3 = TreeNode(6)
-    D3 = TreeNode(1)
-    E3 = TreeNode(3)
-    F3 = TreeNode(5)
-    G3 = TreeNode(7)
-    A3.left = B3
-    A3.right = C3
-    B3.left = D3
-    B3.right = E3
-    C3.left = F3
-    C3.right = G3
-    bst = BST()
-    isBST = bst.isBST(A3)
-    print(isBST)
+    # 路径和
+    paths = PathSum()
+    num = 8
+    hasPath = paths.existPath(A, num)
+    path = paths.getPath(A, num)
+    print(hasPath, path)
