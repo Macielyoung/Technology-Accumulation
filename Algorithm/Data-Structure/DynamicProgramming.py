@@ -38,6 +38,57 @@ class DynamicProgramming(object):
             dp[i] = minnum
         return dp[-1]
 
+    # 现有数量不限的1，5，10，25四种面额的硬币，表示金额为n有多少种方法
+    # 可以构建一个二维表ways[i][j],表示拆分金额j分使用前i种面额的方法数
+    # 则增加一种面额有两种情况：1.ways[i][j]=ways[i-1][j] 2.ways[i][j]=ways[i-1][j]+ways[i][j-coins[i]]
+    def changeCoins(self, coins, n):
+        m = len(coins)
+        if m == 0 or n < 0:
+            return 0
+        ways = [[0 for j in range(n+1)] for i in range(m)]
+        for i in range(m):
+            ways[i][0] = 1
+        for j in range(1, n+1):
+            ways[0][j] = 1
+        for i in range(1, m):
+            for j in range(1, n+1):
+                if coins[i] > j:
+                    ways[i][j] = ways[i-1][j]
+                else:
+                    ways[i][j] = ways[i-1][j] + ways[i][j-coins[i]]
+        return ways[-1][-1]
+
+    # 爬楼梯问题，一只青蛙每次可以爬一阶或两阶楼梯，问爬n阶楼梯有多少种方法
+    def climbStairs(self, n):
+        if n <= 0:
+            return 0
+        if n == 1:
+            return 1
+        if n == 2:
+            return 2
+        stairs = [0 for i in range(n+1)]
+        stairs[1], stairs[2] = 1, 2
+        for i in range(3, n+1):
+            stairs[i] = stairs[i-1] + stairs[i-2]
+        return stairs[-1]
+
+    # 装箱问题/背包问题
+    def backPacking(self, packages, V):
+        if not packages or V <= 0:
+            return 0
+        n = len(packages)
+        capcity = [[0 for i in range(V+1)] for j in range(n+1)]
+        # c[n][V]表示前n件物品转入箱子中最大占据的空间
+        for i in range(1, n+1):
+            for j in range(1, V+1):
+                # 如果剩余的空间大于等于物品容量，那物品可放可不放（比较放入和不放入两种情况下占据的空间大小）
+                if j >= packages[i-1]:
+                    capcity[i][j] = max(capcity[i-1][j], capcity[i-1][j-packages[i-1]]+packages[i-1])
+                # 如果剩余的空间小于物品容量，那物品则不能放入
+                else:
+                    capcity[i][j] = capcity[i-1][j]
+        return capcity[-1][-1]
+
 if __name__ == "__main__":
     DP = DynamicProgramming()
 
@@ -51,8 +102,19 @@ if __name__ == "__main__":
     coin_res = DP.collectCoins(coin_num)
     print(coin_res)
 
+    # 换硬币问题
+    coins = [1, 5, 10, 25]
+    n_coin = 10
+    coin_ways = DP.changeCoins(coins, n_coin)
+    print(coin_ways)
 
+    # 爬楼梯问题
+    stair_num = 3
+    stair_ways = DP.climbStairs(stair_num)
+    print(stair_ways)
 
-
-
-
+    # 背包问题
+    packages = [6, 8, 3, 12, 7, 9]
+    V = 24
+    max_capcity = DP.backPacking(packages, V)
+    print(max_capcity)
