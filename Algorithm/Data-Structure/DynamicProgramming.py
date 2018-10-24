@@ -1,7 +1,7 @@
 #-*- coding: UTF-8 -*-
 
 class DynamicProgramming(object):
-    # 剪绳子问题，把长为n的生子剪成m段(每部分都为整数)，求这些数值的最大乘积
+    # 1.剪绳子问题，把长为n的生子剪成m段(每部分都为整数)，求这些数值的最大乘积
     def splitSlot(self, n):
         # 讨论特殊情况（即最基础情况）
         if n < 2:
@@ -21,7 +21,7 @@ class DynamicProgramming(object):
                 dp[i] = maxlen
         return dp[-1]
 
-    # 现有1，3，5三种面额的硬币若干枚，如何使用最少的硬币组成金额n
+    # 2.现有1，3，5三种面额的硬币若干枚，如何使用最少的硬币组成金额n
     def collectCoins(self, n):
         if n == 1 or n == 3 or n == 5:
             return 1
@@ -38,7 +38,7 @@ class DynamicProgramming(object):
             dp[i] = minnum
         return dp[-1]
 
-    # 现有数量不限的1，5，10，25四种面额的硬币，表示金额为n有多少种方法
+    # 3.现有数量不限的1，5，10，25四种面额的硬币，表示金额为n有多少种方法
     # 可以构建一个二维表ways[i][j],表示拆分金额j分使用前i种面额的方法数
     # 则增加一种面额有两种情况：1.ways[i][j]=ways[i-1][j] 2.ways[i][j]=ways[i-1][j]+ways[i][j-coins[i]]
     def changeCoins(self, coins, n):
@@ -58,7 +58,7 @@ class DynamicProgramming(object):
                     ways[i][j] = ways[i-1][j] + ways[i][j-coins[i]]
         return ways[-1][-1]
 
-    # 爬楼梯问题，一只青蛙每次可以爬一阶或两阶楼梯，问爬n阶楼梯有多少种方法
+    # 4.爬楼梯问题，一只青蛙每次可以爬一阶或两阶楼梯，问爬n阶楼梯有多少种方法
     def climbStairs(self, n):
         if n <= 0:
             return 0
@@ -72,7 +72,7 @@ class DynamicProgramming(object):
             stairs[i] = stairs[i-1] + stairs[i-2]
         return stairs[-1]
 
-    # 装箱问题/背包问题
+    # 5.装箱问题/背包问题
     def backPacking(self, packages, V):
         if not packages or V <= 0:
             return 0
@@ -89,32 +89,120 @@ class DynamicProgramming(object):
                     capcity[i][j] = capcity[i-1][j]
         return capcity[-1][-1]
 
+    # 6.最长递增子序列问题
+    def longSubSequence(self, nums):
+        # 时间复杂度为O(n^2)
+        # 每一个数都和它前面的数做比较
+        if not nums:
+            return 0
+        n = len(nums)
+        length = [1 for i in range(n)]
+        for i in range(n-1):
+            for j in range(i+1):
+                if nums[i+1] > nums[j]:
+                    length[i+1] = max(length[i+1], length[j]+1)
+        return max(length)
+
+    # 时间复杂度O(nlogn)，按dp[t]=k来分类，只要保留dp[t]中最小的nums[t].
+    def LIS(self, nums):
+        def binarySearch(key, g, low, high):
+            while(low < high):
+                mid = (low + high) >> 1
+                if key >= g[mid]:
+                    low = mid + 1
+                else:
+                    high = mid
+            return low
+        n, j = len(nums), 0
+        g = [0 for i in range(n)]
+        g[1], length = nums[0], 1
+        for i in range(1, n):
+            if g[length] < nums[i]:
+                length += 1
+                j = length
+            else:
+                j = binarySearch(nums[i], g, 1, length+1) # 二分查找，找到第一个比nums[i]小的g[k]
+            g[j] = nums[i]
+        return length
+
+    # 7.最长公共子序列问题
+    # def longCommonSequence(self, arr1, arr2):
+
+    # 8.最长公共子串问题
+
+
+    # 9.最大连续子序列和问题
+    # 使用maxSum[i]来表示以第i个数字结尾的子数组的最大和，需要求出max(maxSum[i])
+    def maxSequenceSum(self, nums):
+        if not nums:
+            return 0
+        n = len(nums)
+        maxSum = [0 for i in range(n)]
+        maxSum[0], start = nums[0], 0
+        for i in range(1, n):
+            if maxSum[i-1] <= 0:
+                maxSum[i] = nums[i]
+            else:
+                maxSum[i] = maxSum[i-1]+nums[i]
+        return max(maxSum)
+
+    # 10.股票交易最大化（一次交易）
+    def maxProfit_onedeal(self, prices):
+        n = len(prices)
+        if n < 2:
+            return 0
+        minPrice = prices[0]
+        maxProfit = prices[1] - prices[0]
+        for i in range(2, n):
+            if prices[i-1] < minPrice:
+                minPrice = prices[i-1]
+            profit = prices[i] - minPrice
+            if profit > maxProfit:
+                maxProfit = profit
+        return maxProfit if maxProfit > 0 else 0
+
 if __name__ == "__main__":
     DP = DynamicProgramming()
 
-    # 剪绳子问题
-    n_slot = 8
-    slot_res = DP.splitSlot(n_slot)
-    print(slot_res)
+    # # 剪绳子问题
+    # n_slot = 8
+    # slot_res = DP.splitSlot(n_slot)
+    # print(slot_res)
+    #
+    # # 分硬币问题
+    # coin_num = 11
+    # coin_res = DP.collectCoins(coin_num)
+    # print(coin_res)
+    #
+    # # 换硬币问题
+    # coins = [1, 5, 10, 25]
+    # n_coin = 10
+    # coin_ways = DP.changeCoins(coins, n_coin)
+    # print(coin_ways)
+    #
+    # # 爬楼梯问题
+    # stair_num = 3
+    # stair_ways = DP.climbStairs(stair_num)
+    # print(stair_ways)
+    #
+    # # 背包问题
+    # packages = [6, 8, 3, 12, 7, 9]
+    # V = 24
+    # max_capcity = DP.backPacking(packages, V)
+    # print(max_capcity)
+    #
+    # # 最长上升子序列问题
+    # nums6 = [1, 6, 2, 3, 7, 5]
+    # longest = DP.longSubSequence(nums6)
+    # longest2 = DP.LIS(nums6)
+    # print(longest, longest2)
 
-    # 分硬币问题
-    coin_num = 11
-    coin_res = DP.collectCoins(coin_num)
-    print(coin_res)
+    # 最大连续子数组和
+    # nums9 = [-2, 11, -4, 13, -5, -2]
+    # maxSum = DP.maxSequenceSum(nums9)
+    # print(maxSum)
 
-    # 换硬币问题
-    coins = [1, 5, 10, 25]
-    n_coin = 10
-    coin_ways = DP.changeCoins(coins, n_coin)
-    print(coin_ways)
-
-    # 爬楼梯问题
-    stair_num = 3
-    stair_ways = DP.climbStairs(stair_num)
-    print(stair_ways)
-
-    # 背包问题
-    packages = [6, 8, 3, 12, 7, 9]
-    V = 24
-    max_capcity = DP.backPacking(packages, V)
-    print(max_capcity)
+    # 股票交易问题(一次交易)
+    prices_one = [9,11,8,5,7,12,16,14]
+    maxProfit_one = DP.maxProfit_onedeal(prices_one)
+    print(maxProfit_one)
