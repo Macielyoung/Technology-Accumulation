@@ -18,7 +18,7 @@ GBDT是一种迭代的决策树算法，它通过构造一组弱的学习器（�
 
 针对这一问题，Freidman提出了梯度提升算法：利用最速下降的近似方法，即利用损失函数的负梯度在当前模型的值
 
-![](/Users/maciel/Documents/Technology-Accumulation/Machine Learning/机器学习总结/pic/residual.png)
+![](https://github.com/Macielyoung/Technology-Accumulation/blob/master/Machine%20Learning/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/pic/residual.png)
 
 作为回归问题中提升树算法的残差的近似值（与其说负梯度作为残差的近似值，不如说残差是负梯度的一种特例，拟合一个回归树），这就是梯度提升决策树。
 
@@ -26,19 +26,19 @@ GBDT是一种迭代的决策树算法，它通过构造一组弱的学习器（�
 
 **算法步骤**
 
-![](/Users/maciel/Documents/Technology-Accumulation/Machine Learning/机器学习总结/pic/gbdt.jpg)
+![](https://github.com/Macielyoung/Technology-Accumulation/blob/master/Machine%20Learning/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/pic/gbdt.jpg)
 
 具体过程：
 
 1）初始化弱分类器，估计使损失函数极小化的一个常数值，此时树仅有一个根结点
 
-![](/Users/maciel/Documents/Technology-Accumulation/Machine Learning/机器学习总结/pic/gbdt1.jpg)
+![](https://github.com/Macielyoung/Technology-Accumulation/blob/master/Machine%20Learning/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/pic/gbdt1.jpg)
 
 2）对迭代轮数1,2,···,M 
 
 - a）对i=1,2,···,N，计算损失函数的负梯度值在当前模型的值，将它作为残差的估计。即
 
-  ![](/Users/maciel/Documents/Technology-Accumulation/Machine%20Learning/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/pic/gbdt2.jpg)
+  ![](https://github.com/Macielyoung/Technology-Accumulation/blob/master/Machine%20Learning/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/pic/gbdt2.jpg)
 
   对于平方损失函数，它就是通常所说的残差；对于一般损失函数，它就是残差的近似值。
 
@@ -46,15 +46,15 @@ GBDT是一种迭代的决策树算法，它通过构造一组弱的学习器（�
 
 - c）对j=1,2,···,J计算
 
-  ![](/Users/maciel/Documents/Technology-Accumulation/Machine Learning/机器学习总结/pic/gbdt3.jpg)
+  ![](https://github.com/Macielyoung/Technology-Accumulation/blob/master/Machine%20Learning/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/pic/gbdt3.jpg)
 
   即利用线性搜索估计叶结点区域的值，使损失函数极小化
 
 - d）更新回归树
 
-  ![](/Users/maciel/Documents/Technology-Accumulation/Machine Learning/机器学习总结/pic/gbdt4.jpg)
+  ![](https://github.com/Macielyoung/Technology-Accumulation/blob/master/Machine%20Learning/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/pic/gbdt4.jpg)
 
 3）得到输出的最终模型
 
-![](/Users/maciel/Documents/Technology-Accumulation/Machine Learning/机器学习总结/pic/gbdt5.jpg)
+![](https://github.com/Macielyoung/Technology-Accumulation/blob/master/Machine%20Learning/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/pic/gbdt5.jpg)
 
