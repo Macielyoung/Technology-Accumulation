@@ -1,0 +1,32 @@
+Category : Morning,Afternoon,Evening,Night
+Top of the morning to you!|Thank you kindly.
+Top of the morning to you!|And the rest of the day to you.
+Good morning.|Good morning. You look great today.
+Good afternoon.|Good afternoon.
+Good evening.|Good evening.
+Good night. Have a sweet dream.|Godd night. 
+Good morning. You look great today.|Thanks.
+Good morning.|Hello.
+Good afternoon.|Hi.
+Good evening.|How are you.
+Good night|Night, night.
+Good night|Sleep well.
+Have a good night's sleep|Good night.
+I hope you sleep well.|The same to you.
+See you in the morning.|Good night.
+Sweet dreams.|Good night
+Good night|Sweet dreams to you.
+Time for bed!|Good night, sleep tight!
+Good night.|Make sure you get a good night's sleep.
+Good night.|See you in the morning.
+I hope you sleep well.|Thank you. Wish you a sweet dream.
+Get some good sleep.|Okay, you too.
+Lights out!|Okay, good night.
+I'm heading up to bed now.|Sleep tight!
+Good morning|I hope you had a good night's sleep.
+Good morning.|I hope you got some good rest.
+Rise and shine.|Good morning.
+I hope you had a good night's sleep.|Thank you, and you?
+Good morning, honey.|I hope you got some good rest.
+Good morning, sunshine.|Good morning.
+Have a sweet dream.|Nighty night.
