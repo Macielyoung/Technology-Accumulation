@@ -33,4 +33,16 @@
    awk -F" " '{a[$1";"$2]+=$3} END{for(b in a){print b";"a[b]}}' a.txt > b.txt
    ```
 
-6. 
+6. 匹配某条记录同时返回之后的三行记录
+
+   ```
+   grep -A 3 "match" a.log > b.log
+   ```
+
+7. 根据grep后分割的多行进行合并，紧跟第6题（其中每四行中间有一个“—”行）
+
+   ```
+   awk '{if($0!="--"){a=a$0} else{print a; a=""}} b.log > c.log
+   ```
+
+8. 
