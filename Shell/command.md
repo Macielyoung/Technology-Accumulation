@@ -45,4 +45,28 @@
    awk '{if($0!="--"){a=a$0} else{print a; a=""}}' b.log > c.log
    ```
 
-8. 
+8. 使用多个分割符来对行数据进行处理
+
+   ```
+   awk -F"[-:,]" '{print $0}' a.log | head
+   ```
+
+9. 降序排序输出结果
+
+   ```
+   sort -n -r -k 3 -t ';' a.log
+   ```
+
+10. 全局替换某个字符串
+
+   ```
+   sed 's/t-shirts/Tshirts/g' < a.log > b.log
+   ```
+
+11. 句子频率统计并降序输出
+
+    ```
+    awk -F"[:,]" '{a[$2]+=1} END{for(b in a){print b" : "a[b]}}' a.log | sort -n -r -k 2 -t ":" | head -n 50
+    ```
+
+12. 
