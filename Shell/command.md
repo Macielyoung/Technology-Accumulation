@@ -57,29 +57,29 @@
    sort -n -r -k 3 -t ';' a.log
    ```
 
-10. 全局替换某个字符串
+10. 句子频率统计并降序输出
 
    ```shell
-   sed 's/t-shirts/Tshirts/g' < a.log > b.log
+   awk -F"[:,]" '{a[$2]+=1} END{for(b in a){print b" : "a[b]}}' a.log | sort -n -r -k 2 -t ":" | head -n 50
    ```
 
-11. 句子频率统计并降序输出
-
-    ```shell
-    awk -F"[:,]" '{a[$2]+=1} END{for(b in a){print b" : "a[b]}}' a.log | sort -n -r -k 2 -t ":" | head -n 50
-    ```
-
-12. 针对shell变量进行替换操作(针对x变量将所有的‘|’符号换成空格符，其中‘//’表示替换所有)
+11. 针对shell变量进行替换操作(针对x变量将所有的‘|’符号换成空格符，其中‘//’表示替换所有)
 
     ```shell
     ${x//\|/\ }
     ```
 
-13. 将内容写入文件和追加入文件
+12. 将内容写入文件和追加入文件
 
     ```shell
     echo "$x" > a.log
     echo "$x" >> a.log
+    ```
+
+13. 全局替换文件中的内容，比如把t-shirts替换为Tshirts。
+
+    ```shell
+    sed 's/t-shirts/Tshirts/g' < a.log > b.log
     ```
 
 14. 
