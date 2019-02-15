@@ -59,9 +59,9 @@
 
 10. 句子频率统计并降序输出
 
-   ```shell
-   awk -F"[:,]" '{a[$2]+=1} END{for(b in a){print b" : "a[b]}}' a.log | sort -n -r -k 2 -t ":" | head -n 50
-   ```
+  ```shell
+  awk -F"[:,]" '{a[$2]+=1} END{for(b in a){print b" : "a[b]}}' a.log | sort -n -r -k 2 -t ":" | head -n 50
+  ```
 
 11. 针对shell变量进行替换操作(针对x变量将所有的‘|’符号换成空格符，其中‘//’表示替换所有)
 
@@ -82,4 +82,20 @@
     sed 's/t-shirts/Tshirts/g' < a.log > b.log
     ```
 
-14. 
+14. 截断每行字符串
+
+    ```shell
+    # 保留第10个字符往后
+    cut -c 10- a.log > b.log
+    # 以":"分割字符，输出第3-5列
+    cut -d ":" -f 3-5
+    ```
+
+15. awk分割字符串后再匹配输出
+
+    ```shell
+    # 以";"分割字符串后匹配第一列中含有bananas的行
+    awk -F ";" '$1 ~ /bananas/ {print $0}' a.log | head
+    ```
+
+16. 
