@@ -98,4 +98,29 @@
     awk -F ";" '$1 ~ /bananas/ {print $0}' a.log | head
     ```
 
-16. 
+16. 去除字符串中的空格，可配合awk使用
+
+    ```shell
+    # 去除左边空格
+    awk -F "[:,'{}\"]" '{a=sub(/^[[:blank:]]*/,"",$1); print a}' a.log | head
+    # 去除右边空格
+    awk -F "[:,'{}\"]" '{a=sub(/[[:blank:]]*$/,"",$1); print a}' a.log | head
+    # 去除所有空格
+    awk -F "[:,'{}\"]" '{a=gsub(/[[:blank:]]*/,"",$1); print a}' a.log | head
+    ```
+
+17. 去除空行
+
+    ```shell
+    # 用grep指令
+    grep -v "^$" a.log | head
+    # 用awk指令
+    awk '{if($0!="")print}' a.log | head；
+    awk '{if(length!=0) print $0}' a.log | head
+    # 用sed指令
+    sed '/^$/d' a.log | head
+    # 用tr指令
+    cat a.log | tr -s "\n" | head
+    ```
+
+18. 
