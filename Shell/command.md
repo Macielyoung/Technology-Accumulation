@@ -102,11 +102,11 @@
 
     ```shell
     # 去除左边空格
-    awk -F "[:,'{}\"]" '{a=sub(/^[[:blank:]]*/,"",$1); print a}' a.log | head
+    awk -F "[:,'{}\"]" '{sub(/^[[:blank:]]*/,"",$1); print $1}' a.log | head
     # 去除右边空格
-    awk -F "[:,'{}\"]" '{a=sub(/[[:blank:]]*$/,"",$1); print a}' a.log | head
+    awk -F "[:,'{}\"]" '{sub(/[[:blank:]]*$/,"",$1); print $1}' a.log | head
     # 去除所有空格
-    awk -F "[:,'{}\"]" '{a=gsub(/[[:blank:]]*/,"",$1); print a}' a.log | head
+    awk -F "[:,'{}\"]" '{gsub(/[[:blank:]]*/,"",$1); print $1}' a.log | head
     ```
 
 17. 去除空行
