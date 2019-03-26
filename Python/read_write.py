@@ -54,22 +54,33 @@ def write_csv(headers, contents):
 		fcsv.writeheader()
 		fcsv.writerows(contents)
 
+# list写csv文件
+def write_csv2(headers, contents):
+	with open('test.csv', 'w') as csvfile:
+		writer = csv.writer(csvfile, delimiter='\t')
+		writer.writerow(headers)
+		for content in contents:
+			writer.writerow(content)
+
 if __name__ == '__main__':
-	res = read_txt('morning.txt')
-	print(res)
+	# res = read_txt('morning.txt')
+	# print(res)
 
-	write_single_txt(res)
-	write_multiple_txt(res)
+	# write_single_txt(res)
+	# write_multiple_txt(res)
 
-	read_csv('stock.csv')
-	read_dict_csv('stock.csv')
+	# read_csv('stock.csv')
+	# read_dict_csv('stock.csv')
 
 	headers = ['Symbol', 'Price', 'Date', 'Time', 'Change', 'Volume']
-	rows = [{'Symbol':'AA', 'Price':39.48, 'Date':'6/11/2007',
-		'Time':'9:36am', 'Change':-0.18, 'Volume':181800},
-		{'Symbol':'AIG', 'Price': 71.38, 'Date':'6/11/2007',
-		'Time':'9:36am', 'Change':-0.15, 'Volume': 195500},
-		{'Symbol':'AXP', 'Price': 62.58, 'Date':'6/11/2007',
-		'Time':'9:36am', 'Change':-0.46, 'Volume': 935000},
-		]
-	write_csv(headers, rows)
+	# rows = [{'Symbol':'AA', 'Price':39.48, 'Date':'6/11/2007',
+	# 	'Time':'9:36am', 'Change':-0.18, 'Volume':181800},
+	# 	{'Symbol':'AIG', 'Price': 71.38, 'Date':'6/11/2007',
+	# 	'Time':'9:36am', 'Change':-0.15, 'Volume': 195500},
+	# 	{'Symbol':'AXP', 'Price': 62.58, 'Date':'6/11/2007',
+	# 	'Time':'9:36am', 'Change':-0.46, 'Volume': 935000},
+	# 	]
+	# write_csv(headers, rows)
+
+	contents = [['AA', 39.48, '6/11/2007', '9:36am', -0.18, 181800], ['AIG', 71.38, '6/11/2007', '9:36am', -0.15, 195500]]
+	write_csv2(headers, contents)
