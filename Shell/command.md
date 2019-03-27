@@ -60,7 +60,7 @@
 10. 句子频率统计并降序输出
 
   ```shell
-  awk -F"[:,]" '{a[$2]+=1} END{for(b in a){print b" : "a[b]}}' a.log | sort -n -r -k 2 -t ":" | head -n 50
+  awk -F"[:,]" '{a[$2]+=1} END{for(b in a){print b" : "a[b]}}' a.log | sort -n -r -k 2 -t ":" | head
   ```
 
 11. 针对shell变量进行替换操作(针对x变量将所有的‘|’符号换成空格符，其中‘//’表示替换所有)
@@ -123,4 +123,20 @@
     cat a.log | tr -s "\n" | head
     ```
 
-18. 
+18. 截取字符串
+
+    ```shell
+    # 使用echo来分割字符串，截取第二位到倒数第二位字符串
+    raw="abcdefgfedcba"
+    
+    # 方法1: 直接分片（在Terminal没有尝试成功，暂时不知道原因）
+    res1=$(echo ${raw:2:(-2)})
+    echo ${res1}
+    
+    # 方法2: 先截取到倒数第二位的字符串，再截取从第二位开始的字符串
+    tmp=$(echo ${raw::${tmp} -2})
+    res2=$(echo ${tmp:2})
+    echo ${res2}
+    ```
+
+19. 
