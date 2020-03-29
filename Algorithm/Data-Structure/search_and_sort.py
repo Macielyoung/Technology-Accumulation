@@ -136,7 +136,36 @@ def postorder_iterative(root):
             stack.append(cur.right)
     return node_data[::-1]
 
-# 栈和队列
+# 查找旋转数组的最小数字
+# 基本思想：使用二分查找法，采用双指针，分别指向开头和结尾元素，如果中间元素大于等于起始元素，则最小数字在后半部分，反之亦然。
+# 注意特殊情况：
+# （1）移动0个元素到结尾，数组仍然是递增排序，那么开头就是最小元素。
+# （2）开头、结尾和中间元素都相等，这时最小数字在两侧都有可能，比如[1,0,1,1,1]和[1,1,1,0,1]，因此需要执行顺序查找.
+def MinNumberInRotatedList(nums: list):
+    if len(nums) == 0:
+        return None
+    indexMid = 0
+    i, j = 0, len(nums)-1
+    while nums[i] >= nums[j]:
+        if j - i == 1:
+            indexMid = j
+            break
+        indexMid = (i + j) // 2
+        if (nums[i] == nums[j] and nums[i] == nums[indexMid]):
+            return MinInOrder(nums, i, j)
+        if nums[indexMid] >= nums[i]:
+            i = indexMid
+        elif nums[indexMid] <= nums[j]:
+            j = indexMid
+    return nums[indexMid] 
+
+def MinInOrder(nums, i, j):
+    minNum = nums[i]
+    for k in range(i, j):
+        if nums[k] < minNum:
+            minNum = nums[k]
+    return minNum
+
         
 if __name__ == "__main__":
     # # 1. 二维数组查找
@@ -171,3 +200,14 @@ if __name__ == "__main__":
     # print(node_data5)
     # node_data6 = postorder_iterative(root)
     # print(node_data6)
+
+    # 查找旋转数组中最小的数字，注意特殊情况
+    nums1 = [3, 4, 5, 1, 2]
+    nums2 = [0, 1, 2, 3, 4]
+    nums3 = [1, 0, 1, 1, 1]
+    nums4 = [1, 1, 1, 0, 1]
+    min1 = MinNumberInRotatedList(nums1)
+    min2 = MinNumberInRotatedList(nums2)
+    min3 = MinNumberInRotatedList(nums3)
+    min4 = MinNumberInRotatedList(nums4)
+    print(min1, min2, min3, min4)
