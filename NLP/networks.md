@@ -50,7 +50,31 @@ b.shape: torch.Size([1, 64, 112, 112])
 
 ### 2. RNN系列
 
+
+
 ### 3. Transformer系列
 
+![transformer](/Users/maciel/Documents/gitprojet/Technology-Accumulation/NLP/transformer.jpeg)
 
+（1）Transformer
+
+Transformer本身还是一个Encoder-Decoder模型，可以认为是一个Seq2Seq with attention的结构。
+
+Encoder端由N个相同大模块堆叠而成。每个大模块由两个子模块组成，分别为多头self-attention模块和前馈神经网络模块。
+
+Decoder端同样由N个相同大模块组成，其中每个大模块由三个子模块组成，分别为多头self-attention模块，多头Encoder-Decoder Attention模块和前馈神经网络结构。Decoder端训练和测试时接收的输入是不同的，训练时输入为上次输入加上输入序列后移一位的Ground Truth（比如一个新单词的词向量或者一段新音频特征），其中时间步为1时是一个特殊的token，用于对应任务设置的特定输入。**实际训练过程中一次性将目标序列的embedding都输入到第一个模块中，然后在多头attention模块中对输入序列进行mask**。测试时是挨个生成对应位置的输出。
+
+Transformer中使用的attention公式是：
+
+$$Attention(Q,K,V)=softmax(\frac{QK^T}{\sqrt{d_k}})V$$
+
+可描述为**将query和key-value键值对的一组集合映射到输出**。多头self-attention模块，则是将Q、K、V通过参数矩阵映射后（给Q、K、V分别接一个全连接层），然后再做self-attention，最后再将所有结果拼接起来。
+
+对应公式为：
+
+$$MultiHead(Q,K,V)=Concat(head_1,head_2,...,head_h)W^O$$
+
+$$where ~head_i=Attention(QW_i^Q,K_i^K,V_i^V)$$
+
+其中$W_i^Q,W_i^K,W_i^V \in \mathbb{R}^{d_{model}\times d_k}$，$W^O \in \mathbb{R}^{hd_v \times d_{model}}$。
 
