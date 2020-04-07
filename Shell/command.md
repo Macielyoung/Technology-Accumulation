@@ -139,4 +139,29 @@
     echo ${res2}
     ```
 
-19. 
+19. 根据第二个文件中的词表，匹配第一份文件中所有包含该此表单词的记录。(即实现多个字段grep的操作）
+
+    ```shell
+    示例：
+    文件1 test1.txt:
+    abdsasd a
+    sdasdn d
+    sadjad e
+    sadsaj e
+    sadds f
+    sadjf g
+    sdajsd apple
+    
+    文件2 test2.txt:
+    a
+    b
+    c
+    d
+    e
+    f
+    g
+    
+    awk -F' ' 'NR==FNR{a[$1]=1}NR!=FNR{if(a[$NF]==1){print $0}}' test2.txt test1.txt >  grep_res.txt
+    ```
+
+20. 
