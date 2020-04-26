@@ -126,10 +126,43 @@ class DynamicProgramming(object):
         return length
 
     # 7.最长公共子序列问题
-    # def longCommonSequence(self, arr1, arr2):
+    def longCommonSequence(self, arr1, arr2):
+        # 时间复杂度：O（m*n）
+        # 使用dp[i][j]表示字符串A第i个位置和字符串第j个位置结尾的最长公共子序列
+        # if i==0 or j==0, dp[i][j]=0
+        # if A[i]==B[j], dp[i][j]=dp[i-1][j-1]+1
+        # if A[i]!=B[j], dp[i][j]=max(dp[i-1][j], dp[i][j-1])
+        l1, l2 = len(arr1), len(arr2)
+        dp = [[0]*(l2+1)]*(l1+1)
+        for i in range(1, l1+1):
+            for j in range(1, l2+1):
+                if arr1[i-1] == arr2[j-1]:
+                    dp[i][j] = dp[i-1][j-1] + 1
+                else:
+                    dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+        return dp[-1][-1]
 
     # 8.最长公共子串问题
-
+    def LCstring(self, string1, string2):
+        # 时间复杂度：O（m*n）
+        # res[i][j]表示以A[i]和B[j]为结尾元素的最长公共子串长度
+        # i==0 or j==0, res[i][j] = 0
+        # if A[i]==B[j], res[i][j] = res[i-1][j-1] + 1
+        # if A[i]!=B[j], res[i][j] = 0
+        len1 = len(string1)
+        len2 = len(string2)
+        res = [[0 for i in range(len1+1)] for j in range(len2+1)]
+        result = 0
+        end = 0
+        for i in range(1,len2+1):
+            for j in range(1,len1+1):
+                if string2[i-1] == string1[j-1]:
+                    res[i][j] = res[i-1][j-1]+1
+                    if res[i][j] > result:
+                        result = res[i][j]
+                        end = i
+        common_substr = string2[end-result: end] 
+        return result, common_substr
 
     # 9.最大连续子序列和问题
     # 使用maxSum[i]来表示以第i个数字结尾的子数组的最大和，需要求出max(maxSum[i])
@@ -160,6 +193,7 @@ class DynamicProgramming(object):
             if profit > maxProfit:
                 maxProfit = profit
         return maxProfit if maxProfit > 0 else 0
+
 
 if __name__ == "__main__":
     DP = DynamicProgramming()
@@ -203,6 +237,19 @@ if __name__ == "__main__":
     # print(maxSum)
 
     # 股票交易问题(一次交易)
-    prices_one = [9,11,8,5,7,12,16,14]
-    maxProfit_one = DP.maxProfit_onedeal(prices_one)
-    print(maxProfit_one)
+    # prices_one = [9,11,8,5,7,12,16,14]
+    # maxProfit_one = DP.maxProfit_onedeal(prices_one)
+    # print(maxProfit_one)
+
+    # 最长公共子串长度
+    # str1 = "1AB2345CD"
+    # str2 = "12345EF"
+    # res, common_substr = DP.LCstring(str1, str2)
+    # # res, common_substr = DP.longest_sublist_length(listA, listB)
+    # print(res)
+    # print(common_substr)
+
+    arr1 = "helloworld"
+    arr2 = "loop"
+    res = DP.longCommonSequence(arr1, arr2)
+    print(res)

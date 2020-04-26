@@ -427,12 +427,12 @@ if __name__ == '__main__':
     # isMirror = comparation.isMirror(A, A2)
     # print(isSame, isAVL, isMirror)
     #
-    # # 求一棵树的镜像(自上而下递归翻转)
-    # Mirror = MirrorBT()
-    # root = Mirror.getMirror(A)
-    # root2 = Mirror.invertTree(A)
-    # print(root.left.val, root.left.left.val)
-    # print(root2.left.val, root2.left.left.val)
+    # 求一棵树的镜像(自上而下递归翻转)
+    Mirror = MirrorBT()
+    root = Mirror.getMirror(A)
+    root2 = Mirror.invertTree(A)
+    print(root.left.val, root.left.left.val)
+    print(root2.left.val, root2.left.left.val)
     #
     # # 求两个节点的最近公共祖先
     # common = commonParentBT()
