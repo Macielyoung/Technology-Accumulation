@@ -299,6 +299,20 @@ def attention(qurey, key, value, mask=None, dropout=None):
 
 
 
+Transformer相关问题
+
+```
+1. 不考虑多头，self-attention中词向量不乘QKV参数矩阵，会有什么问题。
+self-attention核心是使用文本中的其他词来增强目标词的语义表示，从而更好的利用上下文信息，因此sequence中的每个词都会和所有词做点积计算相似度。如果不乘QKV参数矩阵，那么词的q,k,v完全是相同的，因此相等时点积最大，这就意味在Softmax后的加权平均中，该词所占的比重最大，无法有效利用上下文信息。而乘以QKV矩阵使得q，k，v都不同，一定程度上能有效减轻上述问题的影响。另外QKV矩阵也使得多头类似于CNN中的多个通道，能够捕捉更丰富的特征信息。
+
+2. self-attention的时间复杂度。
+self-attention分为三个步骤，相似度计算、softmax和加权平均。相似度计算的时间内复杂度是O(n^2*d)，n是序列长度，d是embedding长度。相似度计算相当于是大小为(n,d)和(d,n)的两个矩阵相乘，时间复杂度为O(n^2*d)，softmax时间复杂度为O(n^2)，加权评分相当于是(n,n)和(n,d)两个矩阵相乘，时间复杂度为O(n^2*d)，因此最终时间复杂度为O(n^2*d)。
+
+3. Transformer在哪做了权重共享，为什么可以共享
+（1）Encoder和Decoder间的Embedding层权重共享。
+（2）Decoder中的Embeddig和FC层权重共享。
+```
+
 
 
 #### 2. Transformer-XL
@@ -424,6 +438,19 @@ BERT的输入也与GPT类似都用了[CLS]和[SEP]，相比之下在预训练和
 ![BERT-RC](/Users/maciel/Documents/gitprojet/Technology-Accumulation/NLP/pic/BERT-RC.png)
 
 和QA类似。
+
+
+
+BERT相关问题
+
+```
+1. 为什么BERT在第一句前会加一个[CLS]标志?
+BERT在第一句前会加一个[CLS]标志，最后一层该位对应向量可以作为整句话的语义表示，从而用于下游的分类任务等。
+为什么选它呢，因为与文本中已有的其它词相比，这个无明显语义信息的符号会更公平地融合文本中各个词的语义信息，从而更好的表示整句话的语义。
+
+2. BERT非线性的来源在哪里？
+前馈层的gelu激活函数和self-attention。
+```
 
 
 
