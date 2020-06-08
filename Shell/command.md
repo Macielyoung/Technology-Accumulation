@@ -164,4 +164,10 @@
     awk -F' ' 'NR==FNR{a[$1]=1}NR!=FNR{if(a[$NF]==1){print $0}}' test2.txt test1.txt >  grep_res.txt
     ```
 
-20. 
+20. 统计实时并发数。
+
+    ```shell
+    grep "iterval:" wsgi.log | awk -F"[ ,]" '{print a[$4]+=1} END{for (b in a){print b": "a[b]}}'^C
+    ```
+
+21. 
