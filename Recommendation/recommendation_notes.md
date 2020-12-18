@@ -82,6 +82,115 @@
 
    （5）场景信息（上下文信息）。它是描述推荐行为产生的场景的信息。最常用的上下文信息是“时间”和通过 GPS、IP 地址获得的“地点”信息。在实际的推荐系统应用中，我们更多还是利用时间、地点、推荐页面这些易获取的场景特征。
 
+
+
+### Spark解决特征处理
+
+1. 类别型特征处理
+
+   我们进行特征处理的目的，是把所有的特征全部转换成一个数值型的特征向量，对于数值型特征，这个过程非常简单，直接把这个数值放到特征向量上相应的维度上就可以了。但是对于类别、ID 类特征，这里我们就要用到 One-hot 编码（也被称为独热编码），它是将类别、ID 型特征转换成数值向量的一种最典型的编码方式。它通过把所有其他维度置为 0，单独将当前类别或者 ID 对应的维度置为 1 的方式生成特征向量。
+
+   Spark使用机器学习库MLlib来完成One-hot特征的处理。最主要的步骤是，我们先创建一个负责 One-hot 编码的转换器，OneHotEncoderEstimator，然后通过它的 fit 函数完成指定特征的预处理，并利用 transform 函数将原始特征转换成 One-hot 特征。实现代码如下：
+
+   ```scala
+   
+   def oneHotEncoderExample(samples:DataFrame): Unit ={
+     //samples样本集中的每一条数据代表一部电影的信息，其中movieId为电影id
+     val samplesWithIdNumber = samples.withColumn("movieIdNumber", col("movieId").cast(sql.types.IntegerType))
+   
+   
+     //利用Spark的机器学习库Spark MLlib创建One-hot编码器
+     val oneHotEncoder = new OneHotEncoderEstimator()
+       .setInputCols(Array("movieIdNumber"))
+       .setOutputCols(Array("movieIdVector"))
+       .setDropLast(false)
+   
+   
+     //训练One-hot编码器，并完成从id特征到One-hot向量的转换
+     val oneHotEncoderSamples = oneHotEncoder.fit(samplesWithIdNumber).transform(samplesWithIdNumber)
+     //打印最终样本的数据结构
+     oneHotEncoderSamples.printSchema()
+     //打印10条样本查看结果
+     oneHotEncoderSamples.show(10)
+   
+   _（参考 com.wzhe.sparrowrecsys.offline.spark.featureeng.FeatureEngineering__中的oneHotEncoderExample函数）_
+   ```
+
+   针对多标签特征来说，转变为对应的Multi-Hot编码（多热编码）即可。
+
    
 
-3. 
+2. 数值型特征处理
+
+   数值型的特征存在两方面问题，一是特征的尺度，一是特征的分布。
+
+   特征尺度易于理解。比如电影推荐中评价次数fr和平均评分fs这两个特征，评价次数理论上是一个数值无上限的特征，而对评分来说，由于采取五分制，所以取值范围在[0,5]之间。由于 fr 和 fs 两个特征的尺度差距太大，如果我们把特征的原始数值直接输入推荐模型，就会导致这两个特征对于模型的影响程度有显著的区别。如果模型中未做特殊处理的话，fr 这个特征由于波动范围高出 fs 几个量级，可能会完全掩盖 fs 作用，这当然是我们不愿意看到的。为此我们希望把两个特征的尺度拉平到一个区域内，通常是[0,1]范围，这就是所谓归一化。
+
+   归一化虽然能够解决特征取值范围不统一的问题，但无法改变特征值的分布。比如电影评分中，大量集中在3.5分附近，越靠近3.5分密度越大。这对于模型学习来说也不是一个好的现象，因为特征的区分度并不高。我们经常会用**分桶（Bucketing）**的方式来解决特征值分布极不均匀的问题。所谓“分桶”，就是将样本按照某特征的值从高到低排序，然后按照桶的数量找到分位数，将样本分到各自的桶中，再用桶 ID 作为特征值。
+
+   在 Spark MLlib 中，分别提供了两个转换器 MinMaxScaler 和 QuantileDiscretizer，来进行归一化和分桶的特征处理。它们的使用方法和之前介绍的 OneHotEncoderEstimator 一样，都是先用 fit 函数进行数据预处理，再用 transform 函数完成特征转换。下面代码利用这两个转换器完成特征归一化和分桶的过程。
+
+   ```scala
+   
+   def ratingFeatures(samples:DataFrame): Unit ={
+     samples.printSchema()
+     samples.show(10)
+   
+   
+     //利用打分表ratings计算电影的平均分、被打分次数等数值型特征
+     val movieFeatures = samples.groupBy(col("movieId"))
+       .agg(count(lit(1)).as("ratingCount"),
+         avg(col("rating")).as("avgRating"),
+         variance(col("rating")).as("ratingVar"))
+         .withColumn("avgRatingVec", double2vec(col("avgRating")))
+   
+   
+     movieFeatures.show(10)
+   
+   
+     //分桶处理，创建QuantileDiscretizer进行分桶，将打分次数这一特征分到100个桶中
+     val ratingCountDiscretizer = new QuantileDiscretizer()
+       .setInputCol("ratingCount")
+       .setOutputCol("ratingCountBucket")
+       .setNumBuckets(100)
+   
+   
+     //归一化处理，创建MinMaxScaler进行归一化，将平均得分进行归一化
+     val ratingScaler = new MinMaxScaler()
+       .setInputCol("avgRatingVec")
+       .setOutputCol("scaleAvgRating")
+   
+   
+     //创建一个pipeline，依次执行两个特征处理过程
+     val pipelineStage: Array[PipelineStage] = Array(ratingCountDiscretizer, ratingScaler)
+     val featurePipeline = new Pipeline().setStages(pipelineStage)
+   
+   
+     val movieProcessedFeatures = featurePipeline.fit(movieFeatures).transform(movieFeatures)
+     //打印最终结果
+     movieProcessedFeatures.show(10)
+   
+   _（参考 com.wzhe.sparrowrecsys.offline.spark.featureeng.FeatureEngineering中的ratingFeatures函数）_
+   ```
+
+   
+
+3. 特征处理总结
+
+   特征处理没有固定模式，上面列的只是一些常见处理方法，在实际应用中，我们需要多种尝试，找到最能提升模型效果的处理方式。
+
+![img](images/b3b8c959df72ce676ae04bd8dd987e7b.png)
+
+
+
+4. Spark中几个常用正则归一化函数
+
+   ```
+   Normalizer: 计算p范数，然后该样本中每个元素除以该范数。l1: 每个样本中每个元素绝对值的和，l2: 每个样本中每个元素的平方和开根号，lp: 每个样本中每个元素的p次方和的p次根，默认用l2范数。
+   
+   StandardScaler: 数据标准化，(xi - u) / σ 【u:均值，σ：方差】当数据(x)按均值(μ)中心化后，再按标准差(σ)缩放，数据就会服从为均值为0，方差为1的正态分布（即标准正态分布）。
+   
+   RobustScaler: (xi - median) / IQR 【median是样本的中位数，IQR是样本的 四分位距：根据第1个四分位数和第3个四分位数之间的范围来缩放数据】。
+   
+   MinMaxScaler: 数据归一化，(xi - min(x)) / (max(x) - min(x)) ;当数据(x)按照最小值中心化后，再按极差（最大值 - 最小值）缩放，数据移动了最小值个单位，并且会被收敛到 [0,1]之间。
+   ```
