@@ -406,5 +406,205 @@
 
 
 
+### 离线模型部署
+
+1. 业界主流模型服务方法
+
+   总体来说，业界主流的模型服务方法有4种，分别是预存推荐结果和Embedding结果、预训练Embedding+轻量级线上模型、PMML模型以及TensorFlow Serving。
+
+   （1）预存推荐结果或Embedding结果。
+
+   对于推荐系统线上服务来说，最简单直接的模型服务方法就是在离线环境下生成对每个用户的推荐结果，然后将结果预存到以 Redis 为代表的线上数据库中。这样，我们在线上环境直接取出预存数据推荐给用户即可。
+
+   该方法优缺点都非常明显。
+
+   优点：1）无须实现模型线上推断过程，线下训练平台与线上服务平台完全解藕，可以灵活地选择任意离线机器学习工具进行模型训练。2）线上服务过程没有复杂计算，推荐系统的线上延迟极低。
+
+   缺点：1）由于需要存储用户✖️物品✖️应用场景的组合推荐结果，在用户数量、物品数量等规模过大后，容易发生组合爆炸的情况，线上数据库根本无力支撑如此大规模结果的存储。2）无法引入线上场景（context）类特征，推荐系统的灵活性和效果受限。
+
+   由于存在这些优缺点，这种直接存储推荐结果的方式比较适用于用户规模较小，或者一些冷启动、热门榜单等特殊的应用场景中。
+
+   在用户规模比较大的场景下，可以通过存储Embedding的方式来替代直接存储推荐结果，通过使用离线训练好的Embedding，然后在线上通过相似度运算得到最终的推荐结果。其局限性同样是无法引入线上场景特征，并且无法进行复杂模型结构的线上推断，表达能力受限。
+
+   
+
+   （2）预训练Embedding+轻量级线上特征
+
+   该方法指的是**用复杂深度学习网络离线训练生成 Embedding，存入内存数据库，再在线上实现逻辑回归或浅层神经网络等轻量级模型来拟合优化目标**。
+
+   线上部分从Redis之类的模型数据库中拿到这些离线生成的Embedding向量，然后和其他特征的Embedding向量组合在一起，传给一个标准的多层神经网络进行预估，这就是一个典型的“预训练Embedding+轻量级线上模型”的服务模式。
+
+   这种方式优点显而易见，就是隔离了离线模型的复杂性和线上推断的效率要求，离线环境下，可以尽情使用复杂结构构建模型，最终仅需提供Embedding给线上模型即可。
+
+   
+
+   （3）PMML转换和部署模型
+
+   PMML是“预测模型标记语言“(Predictive Model Markup Language, PMML)，它是一种通用的以 XML 的形式表示不同模型结构参数的标记语言。在模型上线的过程中，PMML 经常作为中间媒介连接离线训练平台和线上预测平台。
+
+   
+
+   （4）Tensorflow Serving
+
+   从整体工作流程来看，TensorFlow Serving 和 PMML 类工具的流程一致，它们都经历了模型存储、模型载入还原以及提供服务的过程。在具体细节上，TensorFlow 在离线把模型序列化，存储到文件系统，TensorFlow Serving 把模型文件载入到模型服务器，还原模型推断过程，对外以 HTTP 接口或 gRPC 接口的方式提供模型服务。
+
+   ![img](images/51f65a9b9e10b0808338388e20217d52.png)
+
+
+
+### 深度模型及在线服务的一些问题
+
+1. 工业界中哪些因素影响深度学习网络的结构？
+
+   在工业界中，影响深度学习网络结构的因素主要有两大类。
+
+   第一类：业务场景中用户行为的特点。很多模型结构的实现就是为了模拟用户行为的特点，比如注意力机制的引入是用来模拟用户的注意力行为特点，序列模型是用来模拟用户兴趣变迁，特征交叉是为了让用户和物品的相关特征进行交叉等。
+
+   第二类：数据规模、算力的制约。实际业界应用中，数据规模较大后，尽量会选择效果最优的模型结构，而不一定是复杂模型。
+
+   
+
+2. 深度学习模型是越深越好吗？
+
+   模型不是越深越好。深度学习模型变深之后，并不总是能够提高模型效果，有时候深度的增加对模型效果的贡献是微乎其微的。而且模型复杂之后的负面影响也非常多，比如训练时间加长，收敛所需数据和训练轮数增加，模型不一定稳定收敛，模型过拟合的风险增加等等。所以在模型深度的选择上，我们要在尽量保证效果的前提下，选择结构较简单的方案。
+
+   
+
+3. 线上服务的负载均衡一般如何做？
+
+   常用的均衡负载的策略有三种，分别是轮询调度、哈希调度和一致性调度。
+
+   轮询调度就是以轮询的方式依次把请求调度到不同的服务器。在服务器的算力等硬件配置不同的时候，还可以为每个服务器设定权重，按权重比例为能力强的服务器分配更多的请求。
+
+   哈希调度指的是通过某个哈希函数把key分配给某个桶，这里key可以是请求中的用户ID，物品ID等ID型信息，桶的总数就是服务器的总数。这样一来，我们就可以把某个用户的请求分配给某个服务器处理。这么做的好处是可以让一个key落在固定的服务器节点上，有利于节约服务器内部缓存的使用。哈希方式的缺点在于无法高效处理故障点，一旦某个点有故障需要减少桶的数量，或者在 QPS 增大时需要增加服务器，整个分配过程就被完全打乱。
+
+   一致性哈希调度就是更好的解决方案，简单来说就是使用哈希环来解决计算节点的增加和减少的问题。
+
+   
+
+4. 推荐系统的冷启动问题
+
+   冷启动是推荐系统一定要考虑的问题。它是指推荐系统在没有可用信息，或者可用信息很少的情形下怎么做推荐的问题，冷启动可以分为用户冷启动和物品冷启动两类。
+
+   用户冷启动是指用户没有可用的行为历史情况下的推荐问题。一般来说，我们需要清楚在没有推荐历史的情况下，还有什么用户特征可以使用，比如注册时的信息，访问 APP 时可以获得的地点、时间信息等等，根据这些有限的信息，我们可以为用户做一个聚类，为每类冷启动用户返回合适的推荐列表。当然，我们也可以利用可用的冷启动特征，来构建一个较简单的冷启动推荐模型，去解决冷启动问题。
+
+   对于物品冷启动来说，主要处理的是新加入系统的物品，它们没有跟用户的交互信息。所以，针对物品冷启动，我们除了用类似用户冷启动的方式解决它以外，还可以通过物品分类等信息找到一些相似物品，如果这些相似物品已经具有了预训练的 Embedding，我们也可以采用相似物品 Embedding 平均的方式，来快速确定冷启动物品的 Embedding，让它们通过 Embedding 的方式参与推荐过程。
+
+   
+
+5. 在局部敏感哈希的函数中，b 是 0 到 w 间的一个均匀分布随机变量，为什么可以避免分桶边界固化？（哈希公式：hx,b(v)=⌊x⋅v+b/w⌋，⌊⌋ 是向下取整操作）
+
+   如果我们总是固定分桶的边界，很容易让边界两边非常接近的点被分到两个桶里，这是我们不想看到的。所以，这里我们就可以通过随机调整 b 的方式，来生成多个 Hash 函数，在进行多个 Hash 函数的分桶之后，再采用或的方式对分桶结果进行组合查找最近邻向量，就可以一定程度避免这些边界点的问题。
+
+
+
+### Embedding+MLP模型Tensorflow2实现
+
+1. 特征选择和模型设计
+
+   类别型特征Embedding化，数值型特征直接输入MLP，选择movieId、userId、movieGenre、userGenre作为Embedding化的特征，选择物品和用户的统计型特征作为直接输入MLP的数值型特征，具体特征选择如下表所示。
+
+![image-20210115152417172](images/image-20210115152417172.png)
+
+​	MLP模型结构前两层是128维的全连接层，最后一层是sigmoid神经元输出层。我们采用好评/差评作为样本标签，因此解决的事一个类CTR预估的二分类问题。
+
+
+
+2. Tensorflow2实现
+
+   ```python
+   # 1. 导入数据
+   import tensorflow as tf
+   
+   
+   TRAIN_DATA_URL = "file:///Users/zhewang/Workspace/SparrowRecSys/src/main/resources/webroot/sampledata/modelSamples.csv"
+   samples_file_path = tf.keras.utils.get_file("modelSamples.csv", TRAIN_DATA_URL)
+   
+   # 2. 划分训练集和测试集
+   def get_dataset(file_path):
+       dataset = tf.data.experimental.make_csv_dataset(
+           file_path,
+           batch_size=12,
+           label_name='label',
+           na_value="?",
+           num_epochs=1,
+           ignore_errors=True)
+       return dataset
+   
+   # sample dataset size 110830/12(batch_size) = 9235
+   raw_samples_data = get_dataset(samples_file_path)
+   
+   # 1000条样本作为测试集
+   test_dataset = raw_samples_data.take(1000)
+   train_dataset = raw_samples_data.skip(1000)
+   
+   # 3. 载入类别型特征，主要是genre、userId和movieId
+   genre_vocab = ['Film-Noir', 'Action', 'Adventure', 'Horror', 'Romance', 'War', 'Comedy', 'Western', 'Documentary',
+                  'Sci-Fi', 'Drama', 'Thriller',
+                  'Crime', 'Fantasy', 'Animation', 'IMAX', 'Mystery', 'Children', 'Musical']
+   
+   GENRE_FEATURES = {
+       'userGenre1': genre_vocab,
+       'userGenre2': genre_vocab,
+       'userGenre3': genre_vocab,
+       'userGenre4': genre_vocab,
+       'userGenre5': genre_vocab,
+       'movieGenre1': genre_vocab,
+       'movieGenre2': genre_vocab,
+       'movieGenre3': genre_vocab
+   }
+   
+   categorical_columns = []
+   for feature, vocab in GENRE_FEATURES.items():
+       cat_col = tf.feature_column.categorical_column_with_vocabulary_list(
+           key=feature, vocabulary_list=vocab)
+       emb_col = tf.feature_column.embedding_column(cat_col, 10)
+       categorical_columns.append(emb_col)
+   
+   movie_col = tf.feature_column.categorical_column_with_identity(key='movieId', num_buckets=1001)
+   movie_emb_col = tf.feature_column.embedding_column(movie_col, 10)
+   categorical_columns.append(movie_emb_col)
+   
+   user_col = tf.feature_column.categorical_column_with_identity(key='userId', num_buckets=30001)
+   user_emb_col = tf.feature_column.embedding_column(user_col, 10)
+   categorical_columns.append(user_emb_col)
+   
+   # 4. 数值型特征处理
+   numerical_columns = [tf.feature_column.numeric_column('releaseYear'),
+                      tf.feature_column.numeric_column('movieRatingCount'),
+                        tf.feature_column.numeric_column('movieAvgRating'),
+                        tf.feature_column.numeric_column('movieRatingStddev'),
+                        tf.feature_column.numeric_column('userRatingCount'),
+                        tf.feature_column.numeric_column('userAvgRating'),
+                        tf.feature_column.numeric_column('userRatingStddev')]
+   
+   # 5. 定义模型结构
+   preprocessing_layer = tf.keras.layers.DenseFeatures(numerical_columns + categorical_columns)
+   
+   model = tf.keras.Sequential([
+       preprocessing_layer,
+       tf.keras.layers.Dense(128, activation='relu'),
+       tf.keras.layers.Dense(128, activation='relu'),
+       tf.keras.layers.Dense(1, activation='sigmoid'),
+   ])
+   
+   # 6. 定义模型训练相关的参数
+   model.compile(
+       loss='binary_crossentropy',
+       optimizer='adam',
+       metrics=['accuracy'])
+   
+   # 7. 模型训练和评估
+   model.fit(train_dataset, epochs=10)
+   test_loss, test_accuracy = model.evaluate(test_dataset)
+   print('\n\nTest Loss {}, Test Accuracy {}'.format(test_loss, test_accuracy))
+   ```
+
+   
+
+3. 
+
+
+
 
 
